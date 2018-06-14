@@ -67,3 +67,43 @@ jacocoTestReport {
 
 // needed for Travis CI
 check.dependsOn jacocoTestReport
+
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'maven-publish-auth'
+buildscript {
+    dependencies {
+        classpath 'org.hibernate.build.gradle:gradle-maven-publish-auth:2.0.1'
+    }
+    repositories {
+        maven {
+            url "http://repository.jboss.org/nexus/content/groups/public/"
+        }
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'early-birds'
+            artifactId 'clust4j'
+            version version
+
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            if (project.version.endsWith("-SNAPSHOT")) {
+                name = 'eb-artifactory-snapshots'
+                url "https://earlybirds.jfrog.io/earlybirds/libs-snapshot-local"
+            } else {
+                name = 'eb-artifactory-releases'
+                url "https://earlybirds.jfrog.io/earlybirds/libs-release-local"
+            }
+        }
+    }
+}
